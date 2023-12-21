@@ -1,0 +1,161 @@
+{% extends 'home.html' %}
+{% load static %}
+{% block content %}
+    <div class="grid grid-cols-12 gap-4">
+        <div
+                class="col-span-4 block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
+
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ work.name }}</h5>
+            <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Statistics</h5>
+
+
+            <div class="relative overflow-x-auto">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            Cost
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Distance
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Duration
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ solution.statistic.cost }}
+                        </th>
+                        <td class="px-6 py-4">
+                            {{ solution.statistic.distance }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ solution.statistic.duration }}
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Jobs</h5>
+            <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+                {% for job in jobs %}
+                    <li>
+                        {{ job.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+            <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Vehicles</h5>
+
+            <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+                {% for vehicle in vehicles %}
+                    <li>
+                        {{ vehicle.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        <div class="col-span-8 p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
+            <canvas id="myChart" style="width:100%"></canvas>
+        </div>
+        <div class="col-span-12  p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 ">
+
+            <ol class="items-center sm:flex">
+                {% for tour in solution.tours %}
+                    {% for stop in tour.stops %}
+                        <li class="relative mb-6 sm:mb-0">
+                            <div class="flex items-center">
+                                <div class="z-10 flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full ring-0 ring-white dark:bg-blue-900 sm:ring-8 dark:ring-gray-900 shrink-0">
+                                    <svg class="w-2.5 h-2.5 text-blue-800 dark:text-blue-300" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                    </svg>
+                                </div>
+                                <div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"></div>
+                            </div>
+                            <div class="mt-3 sm:pe-8">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {% for activity in stop.activities %} {{ activity.jobId }} {% endfor %}</h3>
+                                <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+                                    arrival: {{ stop.time.arrival }}
+
+                                </time>
+                                <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+
+                                    departure: {{ stop.time.departure }}
+                                </time>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400">Location
+                                    ({{ stop.location.lat }}, {{ stop.location.lng }})</p>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+                                    Distance: {{ stop.distance }}</p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            </ol>
+
+
+        </div>
+    </div>
+{% endblock content %}
+
+{% block script %}
+    <script src="{% static "js/Chart.js" %}"></script>
+
+    <script>
+        const myChart = new Chart("myChart", {
+            type: 'bar',
+            data: {
+                labels: ["driving", "serving", "waiting", "commuting", "parking"],
+                datasets: [{
+                    label: 'Time Profile',
+                    data: [
+                        "{{ solution.statistic.times.driving }}",
+                        "{{ solution.statistic.times.serving }}",
+                        "{{ solution.statistic.times.waiting }}",
+                        "{{ solution.statistic.times.commuting }}",
+                        "{{ solution.statistic.times.parking }}"],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            maxRotation: 90,
+                            minRotation: 80
+                        },
+                        gridLines: {
+                            offsetGridLines: true // à rajouter
+                        }
+                    },],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+{% endblock script %}

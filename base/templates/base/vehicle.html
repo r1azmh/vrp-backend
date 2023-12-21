@@ -1,0 +1,158 @@
+{% extends 'home.html' %}
+{% load static %}
+{% block content %}
+    <div class="container mx-auto">
+        <div class="grid grid-cols-1 gap-8 pt-12 px-20">
+            <div class="p-4 shadow-xl rounded bg-white">
+                <h2 class="text-center text-2xl font-bold">Assign Vehicles</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-4 mt-2 align-center">
+                        <label for="vehicle_id">ID:</label>
+                        <input type="text" id="vehicle_id" name="vehicle_id"
+                               class=" col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               placeholder="vehicle" required>
+                    </div>
+                    <div class="grid grid-cols-4 mt-2 gap-2">
+                        <label class="col-span-2" for="vehicle_location">Latitude:</label>
+                        <input class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               type="number" step=0.00001 id="vehicle_location" name="vehicle_duration_lat" placeholder="Latitude"
+                               required>
+                        <label class="col-span-2" for="vehicle_location">Longitude:</label>
+                        <input class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               type="number" step=0.00001 id="vehicle_location" name="vehicle_location_lan" placeholder="Longitude"
+                               required>
+                    </div>
+                    <div class="grid grid-cols-4 mt-2">
+                        <label for="job_demand">Capacity:</label>
+                        <input class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               type="number" id="vehicle_capacity" name="vehicle_capacity" required>
+                    </div>
+                    <div class="grid grid-cols-6 mt-2 gap-2">
+                        <label class="col-span-2" for="job_location">Shift Start Time:</label>
+                        <input class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               type="text" id="job_location" name="vehicle_start_at" placeholder="start time"
+                               required>
+                        <br>
+                        <label class="col-span-2" for="job_location">Shift End Time:</label>
+                        <input class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                               type="text" id="job_location" name="vehicle_end_at" placeholder="ending time"
+                               required>
+                    </div>
+
+                    <div class="grid grid-cols-4 mt-2">
+                        <label for="job_demand">Vehicle Type:</label>
+                        <select name="vehicle_type_id" id="type_id"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Choose a Type</option>
+                            {% for type in types %}
+                                <option value="{{ type.id }}">{{ type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-4 mt-2">
+                        <label for="job_demand">Profile:</label>
+                        <select name="vehicle_profile_id" id="vehicle_profile"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Choose a profile</option>
+                            {#                            {% for profile in profiles %}#}
+                            {#                                <option value="{{ profile.id }}">{{ profile.name }}</option>#}
+                            {#                            {% endfor %}#}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-4 mt-2">
+                        <label for="job_demand">Work:</label>
+                        <select name="vehicle_work_id" id="vehicle_work"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Choose a work</option>
+                            {% for work in works %}
+                                <option value="{{ work.id }}">{{ work.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit"
+                            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Add Vehicle
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="relative overflow-x-auto my-8">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Latitude
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Longitude
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Capacity
+                    </th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for vehicle in vehicles %}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ vehicle.name }}
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ vehicle.lat }}
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ vehicle.lan }}
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ vehicle.capacity }}
+                        </th>
+                    </tr>
+
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock content %}
+
+{% block script %}
+    <script>
+        const vehicles = []
+        {% for profile in profiles %}
+            var name = "{{ profile.name }}"
+            var id = "{{profile.id}}"
+            var type_id = "{{profile.type.id}}"
+            vehicles.push({id: id, name: name, type_id: type_id})
+        {% endfor %}
+        function createOption(label, value) {
+            var option = document.createElement("option");
+            option.text = label;
+            option.value = value;
+            return option
+        }
+        const vehicle_profile_select = document.getElementById('vehicle_profile')
+        document.addEventListener('input', function (event) {
+                if (event.target.id === 'type_id') {
+                    vehicle_profile_select.innerHTML = '';
+                    vehicles.filter(el => el.type_id === event.target.value).forEach((element) => {
+                        const option = createOption(element.name, element.id)
+                        vehicle_profile_select.appendChild(option)
+                    })
+                }
+                ;
+            }
+            ,
+            false
+        )
+        ;
+    </script>
+{% endblock script %}
