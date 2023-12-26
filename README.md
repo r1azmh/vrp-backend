@@ -25,7 +25,7 @@ pip install djangorestframework==3.14.0
 # Install Markdown support for the browsable API
 pip install markdown==3.5.1
 
-# Install Filtering support
+# Install Filtering support 
 pip install django-filter==23.5
 ```
 2. Clone and Run
