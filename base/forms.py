@@ -9,12 +9,6 @@ class JobForm(ModelForm):
         fields = "__all__"
 
 
-class VehicleTypeForm(ModelForm):
-    class Meta:
-        model = models.VehicleType
-        fields = "__all__"
-
-
 class VehicleProfileForm(ModelForm):
     class Meta:
         model = models.VehicleProfile
@@ -31,6 +25,7 @@ class VehicleForm(ModelForm):
     class Meta:
         model = models.Vehicle
         fields = "__all__"
+
 
 class MultiJobForm(ModelForm):
     class Meta:

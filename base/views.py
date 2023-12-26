@@ -25,11 +25,11 @@ def solve(request, pk):
     work = models.Work.objects.get(pk=pk)
 
     _jobs = models.Job.objects.filter(work_id=pk, multi=None)
-    _multi_jobs = models.MultiJob.objects.filter(work_id=pk)
+    _multi_jobs = models.MultiJob.objects.filter(work_id=pk, job__isnull=False).distinct()
     jobs = [get_job(_job) for _job in _jobs]
     multi_jobs = [get_multi_job(_job) for _job in _multi_jobs]
 
-    _vehicles = models.Vehicle.objects.select_related('type', 'profile').filter(work_id=pk)
+    _vehicles = models.Vehicle.objects.select_related('profile').filter(work_id=pk)
 
     vehicles, profiles = get_vehicles(_vehicles)
     fleet = prg.Fleet(vehicles=vehicles,
@@ -119,13 +119,14 @@ def vehicle(request):
             type_id=vehicle_type_id
         )
     vehicles = models.Vehicle.objects.all()
-    profiles = models.VehicleProfile.objects.select_related('type').all()
-    vehicle_types = models.VehicleType.objects.all()
+    #profiles = models.VehicleProfile.objects.select_related('type').all()
+    profiles = models.VehicleProfile.objects.all()
+    #vehicle_types = models.VehicleType.objects.all()
     works = models.Work.objects.all()
     context = {
         "title": "Vehicle",
         "vehicles": vehicles,
-        "types": vehicle_types,
+        #"types": vehicle_types,
         "works": works,
         "profiles": profiles,
         "errors": errors

@@ -18,6 +18,15 @@ pip install vrp-cli==1.22.1
 
 # Install Pydantic
 pip install pydantic==2.3.0
+
+#Install Django RestFramework
+pip install djangorestframework==3.14.0
+
+# Install Markdown support for the browsable API
+pip install markdown==3.5.1
+
+# Install Filtering support 
+pip install django-filter==23.5
 ```
 2. Clone and Run
 * Choose the project directory: Open the Command Prompt and go to the desired location of your computer where you want to download the project.
