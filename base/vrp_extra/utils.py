@@ -6,7 +6,7 @@ from base.vrp_extra import pragmatic_types as prg
 
 def get_vehicle(_vehicle: models.Vehicle):
     return {"v_type": prg.VehicleType(
-        typeId=_vehicle.type.name,
+        typeId=_vehicle.name,
         vehicleIds=[_vehicle.name],
         profile=prg.VehicleProfile(matrix=_vehicle.profile.name),
         costs=prg.VehicleCosts(
@@ -17,11 +17,11 @@ def get_vehicle(_vehicle: models.Vehicle):
             prg.VehicleShift(
                 start=prg.VehicleShiftStart(
                     earliest=_vehicle.start_at,
-                    location=prg.Location(lat=_vehicle.lat, lng=_vehicle.lan),
+                    location=prg.Location(lat=_vehicle.lat, lng=_vehicle.lng),
                 ),
                 end=prg.VehicleShiftEnd(
                     latest=_vehicle.end_at,
-                    location=prg.Location(lat=_vehicle.lat, lng=_vehicle.lan),
+                    location=prg.Location(lat=_vehicle.lat, lng=_vehicle.lng),
                 )
             )
         ],
@@ -40,9 +40,9 @@ def get_vehicles(_vehicles: List[models.Vehicle]):
 
 
 def get_job_task(_job: models.Job):
-    time = []
+    time = None
     if _job.start_at and _job.end_at:
-        time.append([_job.start_at, _job.end_at])
+        time = [[_job.start_at, _job.end_at]]
     place = [prg.JobPlace(
         location=prg.Location(
             lat=_job.lat,
