@@ -20,7 +20,7 @@ pip install vrp-cli==1.22.1
 pip install pydantic==2.3.0
 ```
 2. Clone and Run
-* Choose the project directory: Open the Command Prompt and go to the desired location of your computer here you want to download the project.
+* Choose the project directory: Open the Command Prompt and go to the desired location of your computer where you want to download the project.
 ```shell
 cd C:\your-location
 ```
