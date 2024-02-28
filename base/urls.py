@@ -4,6 +4,7 @@ from . import views, rest_views
 urlpatterns = [
     path('', views.work, name="home"),
     path('works/', rest_views.get_work, name="work-get"),
+    path('solve/<int:pk>', rest_views.solve, name="work-solve"),
     path('work-create/', rest_views.work_post, name="work-post"),
     path('work_delete/<int:pk>/', rest_views.delete_work, name="work-delete"),
     path('job/', views.job, name='job'),

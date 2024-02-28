@@ -5,3 +5,4 @@ pydantic==2.3.0
 djangorestframework==3.14.0
 markdown==3.5.1
 django-filter==23.5
+django-cors-headers==4.3.1

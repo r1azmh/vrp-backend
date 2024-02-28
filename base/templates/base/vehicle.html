@@ -39,17 +39,6 @@
                                type="text" id="job_location" name="vehicle_end_at" placeholder="ending time"
                                required>
                     </div>
-
-                    <div class="grid grid-cols-4 mt-2">
-                        <label for="job_demand">Vehicle Type:</label>
-                        <select name="vehicle_type_id" id="type_id"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected>Choose a Type</option>
-                            {% for type in types %}
-                                <option value="{{ type.id }}">{{ type.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
                     <div class="grid grid-cols-4 mt-2">
                         <label for="job_demand">Profile:</label>
                         <select name="vehicle_profile_id" id="vehicle_profile"
@@ -127,12 +116,6 @@
 {% block script %}
     <script>
         const vehicles = []
-        {% for profile in profiles %}
-            var name = "{{ profile.name }}"
-            var id = "{{profile.id}}"
-            var type_id = "{{profile.type.id}}"
-            vehicles.push({id: id, name: name, type_id: type_id})
-        {% endfor %}
         function createOption(label, value) {
             var option = document.createElement("option");
             option.text = label;

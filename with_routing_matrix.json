@@ -1,0 +1,797 @@
+{
+  "statistic": {
+    "cost": 1011.758348449,
+    "distance": 468090,
+    "duration": 45347,
+    "times": {
+      "driving": 30047,
+      "serving": 15300,
+      "waiting": 0,
+      "commuting": 0,
+      "parking": 0
+    }
+  },
+  "tours": [
+    {
+      "vehicleId": "Truck2",
+      "typeId": "Truck2",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.98029351599637,
+            "lng": 22.287486265947035
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T15:45:23Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.842073134544165,
+            "lng": 22.95919658996152
+          },
+          "time": {
+            "arrival": "2023-06-05T15:45:59Z",
+            "departure": "2023-06-05T16:00:59Z"
+          },
+          "distance": 256,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container301",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.44581473578822,
+            "lng": 22.21058246366468
+          },
+          "time": {
+            "arrival": "2023-06-05T16:01:00Z",
+            "departure": "2023-06-05T16:16:00Z"
+          },
+          "distance": 279,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container511",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.445933848100665,
+            "lng": 22.210933448859112
+          },
+          "time": {
+            "arrival": "2023-06-05T16:16:00Z",
+            "departure": "2023-06-05T16:31:00Z"
+          },
+          "distance": 292,
+          "load": [
+            3
+          ],
+          "activities": [
+            {
+              "jobId": "Container708",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.98029351599637,
+            "lng": 22.287486265947035
+          },
+          "time": {
+            "arrival": "2023-06-05T16:31:33Z",
+            "departure": "2023-06-05T16:31:33Z"
+          },
+          "distance": 510,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 5.63666759,
+        "distance": 510,
+        "duration": 2770,
+        "times": {
+          "driving": 70,
+          "serving": 2700,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    },
+    {
+      "vehicleId": "Truck3",
+      "typeId": "Truck3",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.98033079191613,
+            "lng": 22.288086119266257
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T18:57:00Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.445531841538305,
+            "lng": 22.211479201950432
+          },
+          "time": {
+            "arrival": "2023-06-05T18:57:00Z",
+            "departure": "2023-06-05T19:12:00Z"
+          },
+          "distance": 0,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container328",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84221025359203,
+            "lng": 22.95911077738756
+          },
+          "time": {
+            "arrival": "2023-06-05T19:12:00Z",
+            "departure": "2023-06-05T19:27:00Z"
+          },
+          "distance": 0,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container655",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.98033079191613,
+            "lng": 22.288086119266257
+          },
+          "time": {
+            "arrival": "2023-06-05T19:27:00Z",
+            "departure": "2023-06-05T19:27:00Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 3.0000006,
+        "distance": 0,
+        "duration": 1800,
+        "times": {
+          "driving": 0,
+          "serving": 1800,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    },
+    {
+      "vehicleId": "Truck1",
+      "typeId": "Truck1",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.980300236389134,
+            "lng": 22.287830378031305
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T13:51:52Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84209272301874,
+            "lng": 22.959454027683385
+          },
+          "time": {
+            "arrival": "2023-06-05T13:51:55Z",
+            "departure": "2023-06-05T14:06:55Z"
+          },
+          "distance": 21,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container631",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84199478051535,
+            "lng": 22.95923949624849
+          },
+          "time": {
+            "arrival": "2023-06-05T14:07:00Z",
+            "departure": "2023-06-05T14:22:00Z"
+          },
+          "distance": 52,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container656",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.44581473578822,
+            "lng": 22.21118782522768
+          },
+          "time": {
+            "arrival": "2023-06-05T14:22:38Z",
+            "departure": "2023-06-05T14:37:38Z"
+          },
+          "distance": 264,
+          "load": [
+            3
+          ],
+          "activities": [
+            {
+              "jobId": "Container530",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.980300236389134,
+            "lng": 22.287830378031305
+          },
+          "time": {
+            "arrival": "2023-06-05T14:38:23Z",
+            "departure": "2023-06-05T14:38:23Z"
+          },
+          "distance": 517,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 5.685667596999999,
+        "distance": 517,
+        "duration": 2791,
+        "times": {
+          "driving": 91,
+          "serving": 2700,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    },
+    {
+      "vehicleId": "Truck5",
+      "typeId": "Truck5",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.98045695246105,
+            "lng": 22.28805250437794
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T09:04:03Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.44597024303092,
+            "lng": 22.2116537105257
+          },
+          "time": {
+            "arrival": "2023-06-05T11:09:00Z",
+            "departure": "2023-06-05T11:24:00Z"
+          },
+          "distance": 117265,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container186",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.842895839236306,
+            "lng": 22.95919658996152
+          },
+          "time": {
+            "arrival": "2023-06-05T11:24:01Z",
+            "departure": "2023-06-05T11:39:01Z"
+          },
+          "distance": 117278,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container661",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84176134976568,
+            "lng": 22.95955992253563
+          },
+          "time": {
+            "arrival": "2023-06-05T11:39:03Z",
+            "departure": "2023-06-05T11:54:03Z"
+          },
+          "distance": 117294,
+          "load": [
+            3
+          ],
+          "activities": [
+            {
+              "jobId": "Container633",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.98045695246105,
+            "lng": 22.28805250437794
+          },
+          "time": {
+            "arrival": "2023-06-05T13:57:55Z",
+            "departure": "2023-06-05T13:57:55Z"
+          },
+          "distance": 233456,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 496.29867254400006,
+        "distance": 233456,
+        "duration": 17632,
+        "times": {
+          "driving": 14932,
+          "serving": 2700,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    },
+    {
+      "vehicleId": "Truck6",
+      "typeId": "Truck6",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.98052567646762,
+            "lng": 22.287377460952904
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T07:30:57Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.44558560797924,
+            "lng": 22.211629820679516
+          },
+          "time": {
+            "arrival": "2023-06-05T09:35:59Z",
+            "departure": "2023-06-05T09:50:59Z"
+          },
+          "distance": 117308,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container134",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.8419294857303,
+            "lng": 22.959714816590857
+          },
+          "time": {
+            "arrival": "2023-06-05T09:50:59Z",
+            "departure": "2023-06-05T10:05:59Z"
+          },
+          "distance": 117310,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container410",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.8423473720002,
+            "lng": 22.95992599684018
+          },
+          "time": {
+            "arrival": "2023-06-05T10:05:59Z",
+            "departure": "2023-06-05T10:20:59Z"
+          },
+          "distance": 117317,
+          "load": [
+            3
+          ],
+          "activities": [
+            {
+              "jobId": "Container648",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.98052567646762,
+            "lng": 22.287377460952904
+          },
+          "time": {
+            "arrival": "2023-06-05T12:24:51Z",
+            "departure": "2023-06-05T12:24:51Z"
+          },
+          "distance": 233485,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 496.36000587800004,
+        "distance": 233485,
+        "duration": 17634,
+        "times": {
+          "driving": 14934,
+          "serving": 2700,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    },
+    {
+      "vehicleId": "Truck4",
+      "typeId": "Truck4",
+      "shiftIndex": 0,
+      "stops": [
+        {
+          "location": {
+            "lat": 61.98027031023442,
+            "lng": 22.28808596747195
+          },
+          "time": {
+            "arrival": "2023-06-05T00:01:00Z",
+            "departure": "2023-06-05T19:49:58Z"
+          },
+          "distance": 0,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "departure",
+              "type": "departure",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84193601485666,
+            "lng": 22.959454027683385
+          },
+          "time": {
+            "arrival": "2023-06-05T19:50:00Z",
+            "departure": "2023-06-05T20:05:00Z"
+          },
+          "distance": 15,
+          "load": [
+            1
+          ],
+          "activities": [
+            {
+              "jobId": "Container405",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.84224290128861,
+            "lng": 22.959368215109457
+          },
+          "time": {
+            "arrival": "2023-06-05T20:05:02Z",
+            "departure": "2023-06-05T20:20:02Z"
+          },
+          "distance": 27,
+          "load": [
+            2
+          ],
+          "activities": [
+            {
+              "jobId": "Container642",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 62.44569562300121,
+            "lng": 22.21075959562566
+          },
+          "time": {
+            "arrival": "2023-06-05T20:20:10Z",
+            "departure": "2023-06-05T20:35:10Z"
+          },
+          "distance": 76,
+          "load": [
+            3
+          ],
+          "activities": [
+            {
+              "jobId": "Container106",
+              "type": "pickup",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        },
+        {
+          "location": {
+            "lat": 61.98027031023442,
+            "lng": 22.28808596747195
+          },
+          "time": {
+            "arrival": "2023-06-05T20:35:18Z",
+            "departure": "2023-06-05T20:35:18Z"
+          },
+          "distance": 122,
+          "load": [
+            0
+          ],
+          "activities": [
+            {
+              "jobId": "arrival",
+              "type": "arrival",
+              "location": null,
+              "time": null,
+              "jobTag": null
+            }
+          ]
+        }
+      ],
+      "statistic": {
+        "cost": 4.777334239999999,
+        "distance": 122,
+        "duration": 2720,
+        "times": {
+          "driving": 20,
+          "serving": 2700,
+          "waiting": 0,
+          "commuting": 0,
+          "parking": 0
+        }
+      }
+    }
+  ]
+}
