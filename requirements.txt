@@ -6,3 +6,5 @@ djangorestframework==3.14.0
 markdown==3.5.1
 django-filter==23.5
 django-cors-headers==4.3.1
+django-extensions==3.2.3
+openrouteservice==2.3.3
