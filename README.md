@@ -22,7 +22,20 @@ cd C:\your-location\vrp-backend
 # Install all the required libraries
 pip install -r requirements.txt
 ```
-3. Run the Solver
+3. Set up Routing Matrix Generator
+
+i. Go to the openrouteservice website using the following link and generate an API key.
+[Link](https://openrouteservice.org/dev/)
+
+ii. Go to 
+```shell
+cd C:\your-location\vrp-backend\base\vrp_extra\utils.py
+```
+ then replace MYKEY with your API key.
+```shell
+client = ors.Client(key='MYKEY')
+```
+4. Run the Solver
 * Run the Django development server:
 ```shell
 python manage.py runserver
