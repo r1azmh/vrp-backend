@@ -26,7 +26,7 @@ class EnumRouteVehicleProfile(str, Enum):
     CYCLING_ELECTRIC = "cycling-electric"
 
 
-client = ors.Client(key='5b3ce3597851110001cf6248ef9295ffd28646fe8c00425f3428dec0')
+client = ors.Client(key='MYKEY')
 
 
 def get_routing_matrix(locations: List[List], profile: EnumRouteVehicleProfile) -> Tuple[List, List]:
