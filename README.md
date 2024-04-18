@@ -37,6 +37,9 @@ client = ors.Client(key='MYKEY')
 ```
 4. Make Migrations
 * Go to comand prompt and write the following comands.
+```shell
+cd C:\your-location\vrp-backend
+```
 ```bash
 python manage.py makemigrations
 ```
