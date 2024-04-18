@@ -11,7 +11,6 @@ from .vrp_extra import new_pragmatic_types as prg, config_types as cfg
 from .vrp_extra.utils import get_job, get_vehicles, get_multi_job, get_vehicle_profile_locations, get_job_locations, \
     EnumRouteVehicleProfile, get_routing_matrix
 
-# Create your views here.
 
 config = cfg.Config(
     termination=cfg.Termination(
@@ -34,7 +33,7 @@ def solve(request, pk):
 
     vehicles, profiles = get_vehicles(_vehicles)
     fleet = prg.Fleet(vehicles=vehicles,
-                      profiles=[prg.RoutingProfile(name=profile, speed=16.67) for profile in profiles])
+                      profiles=[prg.RoutingProfile(name=profile) for profile in profiles])
 
     plan = prg.Plan(jobs=jobs + multi_jobs)
     problem = prg.Problem(plan=plan, fleet=fleet)
@@ -47,14 +46,10 @@ def solve(request, pk):
     if custom_matrix:
         v_locations = get_vehicle_profile_locations(fleet)
         j_locations = get_job_locations(plan)
-        durations, distances = get_routing_matrix(j_locations + v_locations, EnumRouteVehicleProfile.DRIVING_HGV)
-        #durations, distances = list(map(lambda x: int(x), durations)), list(map(lambda x: int(x), distances))
-
-        #vj_locations = []
-        #durations, distances = get_routing_matrix(vj_locations, EnumRouteVehicleProfile.DRIVING_HGV)
+        durations, distances = get_routing_matrix(v_locations + j_locations, EnumRouteVehicleProfile.DRIVING_HGV)
         durations, distances = list(map(lambda x: int(x), durations)), list(map(lambda x: int(x), distances))
 
-        #print('\n\n\n\n locations \n\n\n', v_locations + j_locations)
+        print('\n\n\n\n locations \n\n\n', v_locations + j_locations)
         print('\n\n\n\n durations \n\n\n', durations)
         print('\n\n\n\n  distances \n\n\n', distances)
         matrix = prg.RoutingMatrix(
@@ -156,12 +151,12 @@ def vehicle(request):
         )
     vehicles = models.Vehicle.objects.all()
     profiles = models.VehicleProfile.objects.select_related('type').all()
-    #vehicle_types = models.VehicleType.objects.all()
+    vehicle_types = models.VehicleType.objects.all()
     works = models.Work.objects.all()
     context = {
         "title": "Vehicle",
         "vehicles": vehicles,
-        #"types": vehicle_types,
+        "types": vehicle_types,
         "works": works,
         "profiles": profiles,
         "errors": errors

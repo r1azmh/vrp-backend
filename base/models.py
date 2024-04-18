@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from vrp.mixins.models import AuthorWithTimeStampMixin
+from vrp.mixins.models import AuthorWithTimeStampMixin, TimeStampMixin
 
 
 # Create your models here.
@@ -11,6 +11,15 @@ from vrp.mixins.models import AuthorWithTimeStampMixin
 #
 #     def __str__(self):
 #         return str(self.name)
+
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    penalty = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        return self.name
 
 
 class VehicleProfile(AuthorWithTimeStampMixin):
@@ -38,6 +47,9 @@ class Work(AuthorWithTimeStampMixin):
 
     def __str__(self):
         return str(self.name)
+    
+    class Meta:
+        ordering = ('-created_at',)
 
 
 class Job(AuthorWithTimeStampMixin):
@@ -61,8 +73,12 @@ class Job(AuthorWithTimeStampMixin):
     duration = models.IntegerField(null=False, blank=False)
     start_at = models.CharField(max_length=255, null=True, blank=True)
     end_at = models.CharField(max_length=255, null=True, blank=True)
+
+    # RELATIONS
     work = models.ForeignKey(Work, on_delete=models.CASCADE, null=True, blank=True)
     multi = models.ForeignKey(MultiJob, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL,
+                                 related_name='job')
 
     def __str__(self):
         return str(self.name)
@@ -81,3 +97,16 @@ class Vehicle(AuthorWithTimeStampMixin):
 
     def __str__(self):
         return str(self.profile.name)
+
+
+class Solution(TimeStampMixin):
+    solution = models.JSONField(null=False, blank=False)
+    work = models.OneToOneField(Work, on_delete=models.CASCADE, null=False, blank=False)
+
+    class Meta:
+        ordering = ('-updated_at',)
+
+
+class FreshnessPenalty(models.Model):
+    freshness_penalty = models.JSONField(null=False, blank=False)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, null=False, blank=False)

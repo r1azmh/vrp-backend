@@ -26,7 +26,7 @@ class EnumRouteVehicleProfile(str, Enum):
     CYCLING_ELECTRIC = "cycling-electric"
 
 
-client = ors.Client(key='5b3ce3597851110001cf6248dd61e0bf7f4a4cdbaf06323a168b0b59')
+client = ors.Client(key='5b3ce3597851110001cf6248ef9295ffd28646fe8c00425f3428dec0')
 
 
 def get_routing_matrix(locations: List[List], profile: EnumRouteVehicleProfile) -> Tuple[List, List]:
@@ -86,7 +86,8 @@ def get_job_task(_job: models.Job):
             lng=_job.lng
         ),
         duration=_job.duration,
-        times=time
+        times=time,
+        tag=str(_job.id)
     )]
     return prg.JobTask(
         places=place,
@@ -94,7 +95,8 @@ def get_job_task(_job: models.Job):
     )
 
 
-def get_job(_job: models.Job):
+def get_job(_job: models.Job, jobs: List[models.Job]):
+    jobs.append(_job)
     if _job.job_type == 'pp':
         pickups = get_job_task(_job)
         return prg.Job(
@@ -109,8 +111,10 @@ def get_job(_job: models.Job):
         )
 
 
-def get_multi_job(job: models.MultiJob):
-    jobs = models.Job.objects.filter(multi=job)
+def get_multi_job(job: models.MultiJob, cp_jobs: List[models.Job]):
+    jobs = models.Job.objects.select_related('category').filter(multi=job)
+    jobs = list(jobs)
+    cp_jobs = cp_jobs + jobs
     return prg.Job(
         id=job.name,
         deliveries=[get_job_task(_job) for _job in jobs if _job.job_type == 'dd'],
@@ -137,10 +141,17 @@ def get_vehicle_profile_locations(fleet: prg.Fleet):
         route_p = routing_profile.get(vehicle.profile.matrix, None)
         if route_p:
             route_p.append(flatten(flatten([get_location(obj) for obj in vehicle.shifts])))
+
             routing_profile[vehicle.profile.matrix] = route_p
         else:
-            routing_profile[vehicle.profile.matrix] = flatten([get_location(obj) for obj in vehicle.shifts])
-    return flatten(routing_profile.values())
+            routing_profile[vehicle.profile.matrix] = flatten(
+                [get_location(obj) for obj in vehicle.shifts])
+    locations = routing_profile.values()
+    routing_profile = dict()
+    for _locs in locations:
+        for loc in _locs:
+            routing_profile[f"{loc[0]}{loc[1]}"] = loc
+    return list(routing_profile.values())
 
 
 def get_job_locations(plan: prg.Plan):
@@ -155,3 +166,33 @@ def get_job_locations(plan: prg.Plan):
                 for place in delivery.places:
                     job_locations[f"{place.location.lng}{place.location.lat}"] = [place.location.lng, place.location.lat]
     return list(job_locations.values())
+
+
+def add_arrival(arrival_time):
+    def _job(job):
+        if arrival_time:
+            job["arrival"] = arrival_time
+        return job
+
+    return _job
+
+
+def get_jobs_arrival_time(solution: prg.Solution):
+    job_arrival = {}
+    for tour in solution.tours:
+        tour_jobs = {}
+        for stop in tour.stops:
+            arrival_time = None
+            for act in stop.activities:
+                if act.type == 'departure':
+                    continue
+                if act.type == 'arrival':
+                    arrival_time = stop.time.arrival
+                    continue
+                if act.jobTag:
+                    tour_jobs[int(act.jobTag)] = None
+
+        if arrival_time:
+            for key in tour_jobs.keys():
+                job_arrival[key] = arrival_time
+    return job_arrival
