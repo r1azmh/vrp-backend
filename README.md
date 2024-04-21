@@ -29,11 +29,11 @@ i. Go to the openrouteservice website using the following link and generate an A
 
 ii. Go to 
 ```shell
-cd C:\your-location\vrp-backend\base\vrp_extra\utils.py
+cd C:\your-location\vrp-backend\vrp\settings.py
 ```
- then replace MYKEY with your API key.
+ then replace ORS_SECRET_KEY with your API key.
 ```shell
-client = ors.Client(key='MYKEY')
+ORS_SECRET_KEY = env.str('ORS_SECRET_KEY')
 ```
 4. Make Migrations
 * Go to comand prompt and write the following comands.
