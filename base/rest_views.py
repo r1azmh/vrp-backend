@@ -228,7 +228,7 @@ def bulk_job_create(request):
         serializer = serializers.BulkJobCreate(data=request.data)
         if serializer.is_valid(raise_exception=True):
             reader = csv.DictReader(
-                io.StringIO(serializer.validated_data["file"].read().decode("utf-8")))
+                io.StringIO(serializer.validated_data["file"].read().decode("utf-8-sig")))
             data = list(reader)
             work = serializer.validated_data["work_id"]
             serialize_data = [item | {"work_id": work.id} for item in data]
