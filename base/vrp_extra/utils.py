@@ -3,6 +3,7 @@ from itertools import chain
 from typing import Tuple, List
 
 import openrouteservice as ors
+from django.conf import settings
 
 from base import models
 # from base.vrp_extra import pragmatic_types as prg
@@ -26,10 +27,11 @@ class EnumRouteVehicleProfile(str, Enum):
     CYCLING_ELECTRIC = "cycling-electric"
 
 
-client = ors.Client(key='MYKEY')
+client = ors.Client(key=settings.ORS_SECRET_KEY)
 
 
-def get_routing_matrix(locations: List[List], profile: EnumRouteVehicleProfile) -> Tuple[List, List]:
+def get_routing_matrix(locations: List[List], profile: EnumRouteVehicleProfile) -> Tuple[
+    List, List]:
     distances = []
     durations = []
     mat = client.distance_matrix(locations=locations, metrics=["distance",
@@ -160,11 +162,13 @@ def get_job_locations(plan: prg.Plan):
         if job.pickups:
             for picup in job.pickups:
                 for place in picup.places:
-                    job_locations[f"{place.location.lng}{place.location.lat}"] = [place.location.lng, place.location.lat]
+                    job_locations[f"{place.location.lng}{place.location.lat}"] = [
+                        place.location.lng, place.location.lat]
         if job.deliveries:
             for delivery in job.deliveries:
                 for place in delivery.places:
-                    job_locations[f"{place.location.lng}{place.location.lat}"] = [place.location.lng, place.location.lat]
+                    job_locations[f"{place.location.lng}{place.location.lat}"] = [
+                        place.location.lng, place.location.lat]
     return list(job_locations.values())
 
 
