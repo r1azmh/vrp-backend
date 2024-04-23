@@ -51,6 +51,9 @@ python manage.py migrate
 ```shell
 python manage.py runserver
 ```
+6. Set Up Frontend
+* Download and set up frontend from this [link](https://github.com/r1azmh/vrp-frontend) to use the solver.
+
 ## How to Use
 1. Initiate a New Work
 2. Add Jobs
