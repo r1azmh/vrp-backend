@@ -22,8 +22,8 @@ from base.vrp_extra.utils import get_job, get_multi_job, get_vehicles, get_routi
 
 config = cfg.Config(
     termination=cfg.Termination(
-        maxTime=5,
-        maxGenerations=1000
+        maxTime=300,
+        maxGenerations=3000
     )
 )
 
