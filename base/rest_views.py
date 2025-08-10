@@ -3,12 +3,13 @@ import io
 import json
 import math
 from datetime import datetime
-from django.utils import timezone
+
 import vrp_cli
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
@@ -19,6 +20,7 @@ from base.vrp_extra import new_pragmatic_types as prg, config_types as cfg
 from base.vrp_extra.utils import get_job, get_multi_job, get_vehicles, get_routing_matrix, \
     get_vehicle_profile_locations, get_job_locations, EnumRouteVehicleProfile, \
     get_jobs_arrival_time
+import pandas as pd
 
 config = cfg.Config(
     termination=cfg.Termination(
@@ -127,6 +129,80 @@ def export_solution_csv(request, pk):
         writer.writeheader()
         writer.writerows(solution_data)
         return response
+    return None
+
+
+def calculate_tkm(load: float, distance: float) -> float:
+    """
+    This will calculate tonne-km
+    Formula: row_n = load_(n-1) * (distance_n - distance_(n-1))
+    """
+    # Example modification
+    load = load * 2
+    return load * distance
+
+
+def calculate_emission(tkm: float, emission_intensity = 191) -> float:
+    """
+    This will calculate emission
+    Formula: row_n = (emission_intensity * tkm)/1000
+    """
+    # Example modification
+    return (emission_intensity * tkm)/1000
+
+
+@api_view(["GET"])
+def emission_estimation(request, pk):
+    if request.method == "GET":
+        export_to_csv = request.GET.get("export_to_csv")
+        queryset_sol = models.Solution.objects.select_related('work').filter(id=pk).first()
+        solution_pydantic = prg.Solution(**json.loads(queryset_sol.solution))
+        solution_data = []
+        for tour in solution_pydantic.tours:
+            for stop in tour.stops:
+                for activity in stop.activities:
+                    arrival_time = activity.time.start if (activity.time and activity.time.start) else stop.time.arrival
+                    departure_time = activity.time.end if (activity.time and activity.time.end) else stop.time.departure
+                    solution_data.append({
+                        'Vehicle ID': tour.vehicleId,
+                        'Type': activity.type,
+                        'Job': activity.jobId,
+                        'Lattitude': stop.location.lat,
+                        'Longitude': stop.location.lng,
+                        'Arrival Time': datetime.fromisoformat(str(arrival_time)).astimezone(
+                            timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M:%S"),
+                        'Departure Time': datetime.fromisoformat(str(departure_time)).astimezone(
+                            timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M:%S"),
+                        'Load': stop.load[0],
+                        'Distance': stop.distance,
+                    })
+
+        df = pd.DataFrame.from_records(solution_data)
+
+        df["tkm"] = calculate_tkm(
+            df["Load"].shift(1),
+            df["Distance"] - df["Distance"].shift(1)
+        )
+        df["tkm"].fillna(0, inplace=True)
+        df["emission"] = df["tkm"].apply(lambda x: calculate_emission(x))
+        df = df[["Vehicle ID", "Job", "Load", "Distance", "tkm", "emission"]]
+        if export_to_csv and export_to_csv.lower() == "true":
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="emission_solution.csv"'
+            writer = csv.DictWriter(response, fieldnames=df.columns)
+            writer.writeheader()
+            writer.writerows(df.to_dict(orient="records"))
+            return response
+
+            # Default JSON response
+        total_emission = float(df["emission"].sum())
+        records = df.to_dict("records")
+        return Response({
+            "emission": total_emission,
+            "records": records
+        }, status=status.HTTP_200_OK)
+
+    return None
 
 
 @api_view(["GET"])
@@ -143,6 +219,7 @@ def previous_solution_get(request):
             serializer_solution.get("solution", None), "jobs":
                              serializer_jobs.get("freshness_penalty", None),
                          "work": serializer_solution.get("work", None)})
+    return None
 
 
 @api_view(["GET"])
@@ -153,6 +230,7 @@ def job_get(request):
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.MultiJobSerializerGet(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+    return None
 
 
 @api_view(["GET"])
@@ -163,6 +241,7 @@ def category_get(request):
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.CategorySerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+    return None
 
 
 @api_view(["GET"])
@@ -174,6 +253,7 @@ def get_work(request):
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.WorkSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+    return None
 
 
 @api_view(["GET"])
@@ -184,6 +264,7 @@ def get_search_work(request):
                                     .prefetch_related('vehicle_set').all())
         serializer = serializers.WorkSerializer(result.qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    return None
 
 
 @api_view(["GET"])
@@ -195,6 +276,7 @@ def vehicle_get(request):
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.VehicleSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+    return None
 
 
 @api_view(["POST"])
@@ -338,6 +420,7 @@ def vehicle_profile_get(request):
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.VehicleProfileSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+    return None
 
 
 @api_view(["GET"])
@@ -402,7 +485,6 @@ def solve(request, pk):
     )))
 
     jobs_arrival_time = get_jobs_arrival_time(solution)
-
 
     job_serialized_data = serializers.JobSerializerWithFreshnessPenalty(job_data_db,
                                                                         many=True).data

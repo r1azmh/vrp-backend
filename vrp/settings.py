@@ -82,17 +82,22 @@ WSGI_APPLICATION = 'vrp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': env.str('MYSQL_DATABASE'),
+#         'USER': env.str('MYSQL_USER'),
+#         'PASSWORD': env.str('MYSQL_PASSWORD'),
+#         'HOST': env.str('MYSQL_HOST'),
+#         'PORT': env.int('MYSQL_PORT'),
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env.str('MYSQL_DATABASE'),
-        'USER': env.str('MYSQL_USER'),
-        'PASSWORD': env.str('MYSQL_PASSWORD'),
-        'HOST': env.str('MYSQL_HOST'),
-        'PORT': env.int('MYSQL_PORT'),
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "mydatabase",
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

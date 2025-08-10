@@ -7,6 +7,8 @@ urlpatterns = [
     path('last_solution/', rest_views.previous_solution_get, name="last-solution-get"),
     path('export_solution_csv/<int:pk>/', rest_views.export_solution_csv,
          name="export_solution_csv"),
+    path('emission_report/<int:pk>/', rest_views.emission_estimation,
+         name="emission_solution"),
     path('categories/', rest_views.category_get, name="categories-get"),
     path('category_delete/<int:pk>/', rest_views.category_delete, name="categories-delete"),
     path('category_update/<int:pk>/', rest_views.category_update, name="categories-update"),
