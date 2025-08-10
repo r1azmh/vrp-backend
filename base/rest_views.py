@@ -179,6 +179,8 @@ def emission_estimation(request, pk):
 
         df = pd.DataFrame.from_records(solution_data)
 
+        df["Distance"] = df["Distance"].apply(lambda x: x/1000)
+        
         df["tkm"] = calculate_tkm(
             df["Load"].shift(1),
             df["Distance"] - df["Distance"].shift(1)
