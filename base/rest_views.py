@@ -120,7 +120,7 @@ def export_solution_csv(request, pk):
                         'Departure Time': datetime.fromisoformat(str(departure_time)).astimezone(
                             timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M:%S"),
                         'Load': stop.load[0],
-                        'Distance': stop.distance,
+                        'Distance': stop.distance / 1000,
                     })
 
         response = HttpResponse(content_type='text/csv')
