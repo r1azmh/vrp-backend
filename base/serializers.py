@@ -1,6 +1,7 @@
 import json
 
 from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from . import models
@@ -17,15 +18,40 @@ class CategorySerializer(serializers.ModelSerializer):
         return category.job.count()
 
 
+TRUCK_TYPE_LABELS = {
+    "rigid_3_5_7_5": "Rigid (>3.5–7.5 t)",
+    "rigid_7_5_17": "Rigid (>7.5–17 t)",
+    "rigid_17_plus": "Rigid (>17 t)",
+    "artic_3_5_33": "Articulated (>3.5–33 t)",
+    "artic_33_plus": "Articulated (>33 t)",
+}
+
+TEMP_LABELS = {
+    "ambient": "Ambient",
+    "refrigerated": "Refrigerated",
+}
+
 class VehicleProfileSerializer(serializers.ModelSerializer):
-    total_vehicles = serializers.SerializerMethodField(read_only=True)
+    total_vehicles = serializers.IntegerField(read_only=True)
+    truck_type_display = serializers.SerializerMethodField()
+    temperature_display = serializers.SerializerMethodField()
 
     class Meta:
         model = models.VehicleProfile
-        fields = "__all__"
+        fields = [
+            "id", "name",
+            "fixed_cost", "distance", "time",
+            "truck_type", "truck_type_display",
+            "temperature", "temperature_display",
+            "max_capacity", "total_vehicles",
+            "created_at", "updated_at",
+        ]
 
-    def get_total_vehicles(self, obj):
-        return obj.vehicle_set.count()
+    def get_truck_type_display(self, obj):
+        return TRUCK_TYPE_LABELS.get(getattr(obj, "truck_type", None)) or getattr(obj, "truck_type", None)
+
+    def get_temperature_display(self, obj):
+        return TEMP_LABELS.get(getattr(obj, "temperature", None)) or getattr(obj, "temperature", None)
 
 
 class WorkSerializer(serializers.ModelSerializer):
@@ -39,6 +65,7 @@ class WorkSerializer(serializers.ModelSerializer):
     def get_total_jobs(self, obj):
         return obj.job_set.count()
 
+    total_vehicles = serializers.SerializerMethodField(read_only=True)
     def get_total_vehicles(self, obj):
         return obj.vehicle_set.count()
 
