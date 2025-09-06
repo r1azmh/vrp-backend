@@ -4,10 +4,12 @@ import json
 import math
 from datetime import datetime
 
+import numpy as np
+import pandas as pd
 import vrp_cli
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Count
 from django.db import transaction
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -21,8 +23,6 @@ from base.vrp_extra import new_pragmatic_types as prg, config_types as cfg
 from base.vrp_extra.utils import get_job, get_multi_job, get_vehicles, get_routing_matrix, \
     get_vehicle_profile_locations, get_job_locations, EnumRouteVehicleProfile, \
     get_jobs_arrival_time
-import pandas as pd
-import numpy as np
 
 config = cfg.Config(
     termination=cfg.Termination(
@@ -49,7 +49,7 @@ def work_post(request):
 
 @api_view(["PUT"])
 def work_put(request, pk):
-    work_instance = get_object_or_404(models.Work, pk=pk)
+    work_instance = get_object_or_404(models.Work, pk=pk, created_by=request.user)
     if request.method == "PUT":
         serializer = serializers.WorkSerializer(work_instance, data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -60,7 +60,7 @@ def work_put(request, pk):
 
 @api_view(["PUT"])
 def category_update(request, pk):
-    category_ins = get_object_or_404(models.Category, pk=pk)
+    category_ins = get_object_or_404(models.Category, pk=pk, created_by=request.user)
     if request.method == "PUT":
         serializer = serializers.CategorySerializer(category_ins, data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -91,7 +91,7 @@ def job_post(request):
 
 @api_view(["PUT"])
 def job_put(request, pk):
-    job_instance = get_object_or_404(models.Job, pk=pk)
+    job_instance = get_object_or_404(models.Job, pk=pk, created_by=request.user)
     if request.method == "PUT":
         serializer = serializers.JobSerializer(job_instance, data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -103,7 +103,8 @@ def job_put(request, pk):
 @api_view(["GET"])
 def export_solution_csv(request, pk):
     if request.method == "GET":
-        queryset_sol = models.Solution.objects.select_related('work').filter(id=pk).first()
+        queryset_sol = models.Solution.objects.select_related('work').filter(id=pk,
+                                                                             work__created_by=request.user).first()
         solution_pydantic = prg.Solution(**json.loads(queryset_sol.solution))
         solution_data = []
         for tour in solution_pydantic.tours:
@@ -134,7 +135,6 @@ def export_solution_csv(request, pk):
     return None
 
 
-
 @api_view(["GET"])
 def emission_estimation(request, pk):
     """
@@ -151,7 +151,7 @@ def emission_estimation(request, pk):
     export_to_csv = (request.GET.get("export_to_csv") or "").lower() == "true"
 
     # --- 1) Load solution ---
-    sol = models.Solution.objects.select_related('work').filter(id=pk).first()
+    sol = models.Solution.objects.select_related('work').filter(id=pk, work__created_by=request.user).first()
     if not sol:
         return Response({"detail": "Solution not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -172,7 +172,6 @@ def emission_estimation(request, pk):
                     "_vehicle_key": vehicle_key,
                 })
 
-    
     if not rows:
         if export_to_csv:
             response = HttpResponse(content_type='text/csv')
@@ -213,8 +212,8 @@ def emission_estimation(request, pk):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    df["_truck_type"]   = df["_vehicle_key"].map(lambda k: prof_map[k]["_truck_type"])
-    df["_temperature"]  = df["_vehicle_key"].map(lambda k: prof_map[k]["_temperature"])
+    df["_truck_type"] = df["_vehicle_key"].map(lambda k: prof_map[k]["_truck_type"])
+    df["_temperature"] = df["_vehicle_key"].map(lambda k: prof_map[k]["_temperature"])
     df["_max_capacity"] = df["_vehicle_key"].map(lambda k: prof_map[k]["_max_capacity"])
 
     if (df["_max_capacity"] <= 0).any():
@@ -227,45 +226,45 @@ def emission_estimation(request, pk):
     # --- 4) Segment distance & previous load per vehicle ---
     df["_prev_distance"] = (
         df.groupby("_vehicle_key", sort=False)["Distance"]
-          .shift(1)
-          .fillna(df["Distance"])  # first row per vehicle -> segment 0
+        .shift(1)
+        .fillna(df["Distance"])  # first row per vehicle -> segment 0
     )
     df["_segment_km"] = (df["Distance"] - df["_prev_distance"]).clip(lower=0.0)
 
     df["_prev_load"] = (
         df.groupby("_vehicle_key", sort=False)["Load"]
-          .shift(1)
-          .fillna(df["Load"])  # EF doesn't matter on first row (segment 0)
+        .shift(1)
+        .fillna(df["Load"])  # EF doesn't matter on first row (segment 0)
     )
 
     # --- 5) Bucket selection (exact 0/50/100 else 'avg') ---
     prev_load_int = df["_prev_load"].astype("int64")
-    max_cap_int   = df["_max_capacity"].astype("int64")
-    is0    = prev_load_int == 0
-    is100  = prev_load_int == max_cap_int
-    is50   = (prev_load_int * 2) == max_cap_int
+    max_cap_int = df["_max_capacity"].astype("int64")
+    is0 = prev_load_int == 0
+    is100 = prev_load_int == max_cap_int
+    is50 = (prev_load_int * 2) == max_cap_int
 
     # Use strings for buckets to avoid dtype issues when merging with 'avg'
     df["_bucket"] = np.where(is0, "0",
-                      np.where(is100, "100",
-                        np.where(is50, "50", "avg")))
+                             np.where(is100, "100",
+                                      np.where(is50, "50", "avg")))
 
     # Also compute percentage (for CSV)
     df["_load_pct"] = (prev_load_int * 100.0 / max_cap_int.where(max_cap_int != 0, 1))
 
     # --- 6) Emission factors ---
     EF = {
-        ('rigid_3_5_7_5','ambient'):      {0:0.46138, 50:0.50103, 100:0.54068, 'avg':0.49548},
-        ('rigid_7_5_17','ambient'):       {0:0.55061, 50:0.62832, 100:0.70603, 'avg':0.60501},
-        ('rigid_17_plus','ambient'):      {0:0.77400, 50:0.94152, 100:1.10905, 'avg':0.99156},
-        ('artic_3_5_33','ambient'):       {0:0.62775, 50:0.78163, 100:0.93552, 'avg':0.78471},
-        ('artic_33_plus','ambient'):      {0:0.64734, 50:0.85827, 100:1.06921, 'avg':0.93421},
+        ('rigid_3_5_7_5', 'ambient'): {0: 0.46138, 50: 0.50103, 100: 0.54068, 'avg': 0.49548},
+        ('rigid_7_5_17', 'ambient'): {0: 0.55061, 50: 0.62832, 100: 0.70603, 'avg': 0.60501},
+        ('rigid_17_plus', 'ambient'): {0: 0.77400, 50: 0.94152, 100: 1.10905, 'avg': 0.99156},
+        ('artic_3_5_33', 'ambient'): {0: 0.62775, 50: 0.78163, 100: 0.93552, 'avg': 0.78471},
+        ('artic_33_plus', 'ambient'): {0: 0.64734, 50: 0.85827, 100: 1.06921, 'avg': 0.93421},
 
-        ('rigid_3_5_7_5','refrigerated'): {0:0.54937, 50:0.59667, 100:0.64397, 'avg':0.59005},
-        ('rigid_7_5_17','refrigerated'):  {0:0.65559, 50:0.74830, 100:0.84101, 'avg':0.72049},
-        ('rigid_17_plus','refrigerated'): {0:0.92128, 50:1.12114, 100:1.32100, 'avg':1.18083},
-        ('artic_3_5_33','refrigerated'):  {0:0.72566, 50:0.90403, 100:1.08239, 'avg':0.90759},
-        ('artic_33_plus','refrigerated'): {0:0.74800, 50:0.99249, 100:1.23699, 'avg':1.08051},
+        ('rigid_3_5_7_5', 'refrigerated'): {0: 0.54937, 50: 0.59667, 100: 0.64397, 'avg': 0.59005},
+        ('rigid_7_5_17', 'refrigerated'): {0: 0.65559, 50: 0.74830, 100: 0.84101, 'avg': 0.72049},
+        ('rigid_17_plus', 'refrigerated'): {0: 0.92128, 50: 1.12114, 100: 1.32100, 'avg': 1.18083},
+        ('artic_3_5_33', 'refrigerated'): {0: 0.72566, 50: 0.90403, 100: 1.08239, 'avg': 0.90759},
+        ('artic_33_plus', 'refrigerated'): {0: 0.74800, 50: 0.99249, 100: 1.23699, 'avg': 1.08051},
     }
 
     ef_rows = []
@@ -282,7 +281,7 @@ def emission_estimation(request, pk):
 
     df = df.merge(EF_LUT, on=["_truck_type", "_temperature", "_bucket"], how="left")
     if df["_ef_kg_per_km"].isna().any():
-        missing = df[df["_ef_kg_per_km"].isna()][["_truck_type","_temperature","_bucket"]].drop_duplicates()
+        missing = df[df["_ef_kg_per_km"].isna()][["_truck_type", "_temperature", "_bucket"]].drop_duplicates()
         return Response(
             {"detail": "Missing emission factor mapping", "missing": missing.to_dict("records")},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -293,7 +292,7 @@ def emission_estimation(request, pk):
 
     # JSON for dashboard
     json_cols = ["Vehicle Name", "Job", "Load", "Distance", "Emission (kg)"]
-    out_json = df[json_cols].copy() 
+    out_json = df[json_cols].copy()
     total_emission = float(out_json["Emission (kg)"].sum())
 
     if export_to_csv:
@@ -323,13 +322,11 @@ def emission_estimation(request, pk):
     }, status=status.HTTP_200_OK)
 
 
-
-
 @api_view(["GET"])
 def previous_solution_get(request):
     if request.method == "GET":
         queryset_sol = models.Solution.objects.select_related('work').order_by(
-            '-updated_at').last()
+            '-updated_at').filter(work__created_by=request.user).last()
         if queryset_sol is None:
             return Response({}, status=status.HTTP_200_OK)
         queryset_fresh = models.FreshnessPenalty.objects.filter(solution=queryset_sol).first()
@@ -346,7 +343,8 @@ def previous_solution_get(request):
 def job_get(request):
     if request.method == "GET":
         result = filters.WorkFilter(request.GET,
-                                    queryset=models.Job.objects.select_related('work').all())
+                                    queryset=models.Job.objects.select_related('work').filter(
+                                        created_by=request.user).all())
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.MultiJobSerializerGet(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -357,7 +355,7 @@ def job_get(request):
 def category_get(request):
     if request.method == "GET":
         result = filters.WorkFilter(request.GET,
-                                    queryset=models.Category.objects.all())
+                                    queryset=models.Category.objects.filter(created_by=request.user).all())
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.CategorySerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -369,7 +367,7 @@ def get_work(request):
     if request.method == "GET":
         result = filters.WorkFilter(request.GET, queryset=models.Work.objects \
                                     .prefetch_related('job_set') \
-                                    .prefetch_related('vehicle_set').all())
+                                    .prefetch_related('vehicle_set').filter(created_by=request.user).all())
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.WorkSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -381,7 +379,7 @@ def get_search_work(request):
     if request.method == "GET":
         result = filters.WorkFilter(request.GET, queryset=models.Work.objects \
                                     .prefetch_related('job_set') \
-                                    .prefetch_related('vehicle_set').all())
+                                    .prefetch_related('vehicle_set').filter(created_by=request.user).all())
         serializer = serializers.WorkSerializer(result.qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return None
@@ -392,7 +390,8 @@ def vehicle_get(request):
     if request.method == "GET":
         result = filters.WorkFilter(request.GET,
                                     queryset=models.Vehicle.objects.select_related("profile",
-                                                                                   'work').all())
+                                                                                   'work').filter(
+                                        created_by=request.user).all())
         paginated_queryset = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.VehicleSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -466,7 +465,7 @@ def bulk_fleet_create(request):
 
 @api_view(["DELETE"])
 def job_delete(request, pk):
-    result = get_object_or_404(models.Job, pk=pk)
+    result = get_object_or_404(models.Job, pk=pk, created_by=request.user)
     result.delete()
     return Response({"details": "ok"}, status=status.HTTP_202_ACCEPTED)
 
@@ -480,7 +479,7 @@ def category_delete(request, pk):
 
 @api_view(["DELETE"])
 def delete_work(request, pk):
-    result = get_object_or_404(models.Work, pk=pk)
+    result = get_object_or_404(models.Work, pk=pk, created_by=request.user)
     result.delete()
     return Response({"details": "ok"}, status=status.HTTP_202_ACCEPTED)
 
@@ -497,7 +496,7 @@ def vehicle_bulk_post(request):
 @api_view(["PUT"])
 def vehicle_put(request, pk):
     if request.method == "PUT":
-        vehicle = get_object_or_404(models.Vehicle, pk=pk)
+        vehicle = get_object_or_404(models.Vehicle, pk=pk, created_by=request.user)
         serializer = serializers.VehicleSerializer(vehicle, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -506,7 +505,7 @@ def vehicle_put(request, pk):
 
 @api_view(["DELETE"])
 def vehicle_delete(request, pk):
-    result = get_object_or_404(models.Vehicle, pk=pk)
+    result = get_object_or_404(models.Vehicle, pk=pk, created_by=request.user)
     result.delete()
     return Response({"details": "ok"}, status=status.HTTP_202_ACCEPTED)
 
@@ -523,7 +522,7 @@ def vehicle_profile_post(request):
 
 @api_view(['PUT'])
 def vehicle_profile_update(request, pk):
-    old_profile = get_object_or_404(models.VehicleProfile, pk=pk)
+    old_profile = get_object_or_404(models.VehicleProfile, pk=pk, created_by=request.user)
     if request.method == 'PUT':
         serializer = serializers.VehicleProfileSerializer(old_profile, data=request.data)
         if serializer.is_valid():
@@ -536,8 +535,8 @@ def vehicle_profile_update(request, pk):
 def vehicle_profile_get(request):
     if request.method == "GET":
         qs = (models.VehicleProfile.objects
-              .annotate(total_vehicles=Count("vehicle"))   # <-- annotate by reverse FK
-              .prefetch_related("vehicle_set"))
+              .annotate(total_vehicles=Count("vehicle"))  # <-- annotate by reverse FK
+              .prefetch_related("vehicle_set").filter(created_by=request.user).all())
         result = filters.WorkFilter(request.GET, queryset=qs)
         paginated = paginator.paginate_queryset(result.qs, request)
         serializer = serializers.VehicleProfileSerializer(paginated, many=True)
@@ -549,21 +548,22 @@ def vehicle_profile_get(request):
 def search_vehicle_profile(request):
     qs = (models.VehicleProfile.objects
           .annotate(total_vehicles=Count("vehicle"))
-          .prefetch_related("vehicle_set"))
+          .prefetch_related("vehicle_set").filter(created_by=request.user).all())
     result = filters.WorkFilter(request.GET, queryset=qs)
     serializer = serializers.VehicleProfileSerializer(result.qs, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 @api_view(["DELETE"])
 def delete_vehicle_profile(request, pk):
-    result = get_object_or_404(models.VehicleProfile, pk=pk)
+    result = get_object_or_404(models.VehicleProfile, pk=pk, created_by=request.user)
     result.delete()
     return Response({"details": "ok"}, status=status.HTTP_202_ACCEPTED)
 
 
 @api_view(["GET"])
 def solve(request, pk):
-    work = models.Work.objects.get(pk=pk)
+    work = models.Work.objects.get(pk=pk, created_by=request.user)
 
     _jobs = models.Job.objects.select_related('category').filter(work_id=pk, multi=None)
     _multi_jobs = models.MultiJob.objects.filter(work_id=pk, job__isnull=False).distinct()

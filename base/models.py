@@ -13,7 +13,7 @@ from vrp.mixins.models import AuthorWithTimeStampMixin, TimeStampMixin
 
 
 
-class Category(models.Model):
+class Category(AuthorWithTimeStampMixin):
     name = models.CharField(max_length=50, unique=True, null=False, blank=False)
     penalty = models.FloatField(null=False, blank=False)
 

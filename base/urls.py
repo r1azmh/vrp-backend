@@ -39,7 +39,7 @@ urlpatterns = [
     path("vehicle-profiles-search/", rest_views.search_vehicle_profile,
          name="search-vehicle-profile"),
 
-    path('', views.work, name="home"),
+    path('', views.home, name="home"),
     # path('job/', views.job, name='job'),
     # path('multijob/', views.multi_job, name='multijob'),
     # path('vehicle/', views.vehicle, name='vehicle'),

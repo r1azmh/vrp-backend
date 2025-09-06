@@ -1,0 +1,10 @@
+[project]
+name = "vrp-backend"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "django-userforeignkey>=0.5.0",
+    "ipython>=9.4.0",
+    "pandas>=2.3.1",
+]

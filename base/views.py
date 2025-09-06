@@ -100,6 +100,11 @@ def solution(request, pk):
     return render(request, 'base/solution.html', context=context)
 
 
+def home(request):
+    return render(request, 'index.html', context={})
+
+
+
 def work(request):
     if request.method == "POST":
         name = request.POST.get('work_name')
