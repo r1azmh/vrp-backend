@@ -134,11 +134,14 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-# MEDIA_URL = 'images/'
+STATIC_URL = '/static/'
 
+# Where Django will collect static files for production
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Additional directories to look for static files (during development)
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / "static",
 ]
 
 # Default primary key field type
@@ -148,6 +151,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        # or JWT
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    # 'PAGE_SIZE': 100
 }

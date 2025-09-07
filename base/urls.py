@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, rest_views
+from . import rest_views
 
 urlpatterns = [
     path('works/', rest_views.get_work, name="work-get"),
@@ -38,8 +38,6 @@ urlpatterns = [
     path('vehicle-profiles/', rest_views.vehicle_profile_get, name='vehicle-profile-get'),
     path("vehicle-profiles-search/", rest_views.search_vehicle_profile,
          name="search-vehicle-profile"),
-
-    path('', views.home, name="home"),
     # path('job/', views.job, name='job'),
     # path('multijob/', views.multi_job, name='multijob'),
     # path('vehicle/', views.vehicle, name='vehicle'),

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 
@@ -31,6 +32,7 @@ def signup_view(request):
 
 def login_view(request):
     """Login view"""
+    print(request)
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect("admin-dashboard", path="")
 
@@ -44,10 +46,17 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, f"Welcome back, {user.username} 👋")
-            if user.is_superuser:
-                return redirect("admin-dashboard", path="")
-            return redirect("user-dashboard", path="")
+            return redirect("dashboard", path="")
         else:
             messages.error(request, "Invalid username or password")
 
     return render(request, "index.html")
+
+
+
+def home(request, *args, **kwargs):
+    return render(request, 'index.html', context={})
+
+@login_required(login_url='/login/')  # redirect to login page if not logged in
+def dashboard(request, *args, **kwargs):
+    return render(request, 'index.html', context={})

@@ -10,7 +10,7 @@ from . import models, forms
 from .vrp_extra import new_pragmatic_types as prg, config_types as cfg
 from .vrp_extra.utils import get_job, get_vehicles, get_multi_job, get_vehicle_profile_locations, get_job_locations, \
     EnumRouteVehicleProfile, get_routing_matrix
-
+from django.contrib.auth.decorators import login_required
 
 config = cfg.Config(
     termination=cfg.Termination(
@@ -98,10 +98,6 @@ def solution(request, pk):
         "jobs": jobs
     }
     return render(request, 'base/solution.html', context=context)
-
-
-def home(request):
-    return render(request, 'index.html', context={})
 
 
 
