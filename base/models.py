@@ -14,8 +14,11 @@ from vrp.mixins.models import AuthorWithTimeStampMixin, TimeStampMixin
 
 
 class Category(AuthorWithTimeStampMixin):
-    name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    name = models.CharField(max_length=50, null=False, blank=False)
     penalty = models.FloatField(null=False, blank=False)
+
+    class Meta:
+        unique_together = ("name", "created_by")
 
     def __str__(self):
         return self.name
@@ -50,6 +53,9 @@ class VehicleProfile(AuthorWithTimeStampMixin):
     )
     max_capacity = models.PositiveIntegerField(null=False, blank=False, default=1)
 
+    class Meta:
+        unique_together = ("name", "created_by")
+
     def __str__(self):
         return str(self.name)
 
@@ -69,6 +75,7 @@ class Work(AuthorWithTimeStampMixin):
         return str(self.name)
     
     class Meta:
+        unique_together = ("name", "created_by")
         ordering = ('-created_at',)
 
 
