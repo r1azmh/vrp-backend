@@ -42,6 +42,7 @@ urlpatterns = [
          name='password_reset_complete'),
 
     re_path(r"^dashboard/(?P<path>.*)$", views.dashboard, name="dashboard"),
+    re_path(r"^dashboard(?P<path>.*)$", views.dashboard, name="dashboard-ordinary"),
 
     re_path(r'^(?P<path>.*)$', views.home, name="home"),
 ]

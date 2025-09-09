@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import vrp_cli
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -36,48 +36,127 @@ paginator = LimitOffsetPagination()
 paginator.default_limit = 10
 paginator.default_offset = 0
 
+#
+# @api_view(['POST'])
+# def work_post(request):
+#     if request.method == 'POST':
+#         serializer = serializers.WorkSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response({"message": "Hello, world!"})
+#
+#
+# @api_view(["PUT"])
+# def work_put(request, pk):
+#     work_instance = get_object_or_404(models.Work, pk=pk, created_by=request.user)
+#     if request.method == "PUT":
+#         serializer = serializers.WorkSerializer(work_instance, data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#     return Response({"message": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# @api_view(["PUT"])
+# def category_update(request, pk):
+#     category_ins = get_object_or_404(models.Category, pk=pk, created_by=request.user)
+#     if request.method == "PUT":
+#         serializer = serializers.CategorySerializer(category_ins, data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#     return Response({"message": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# @api_view(["POST"])
+# def category_create(request):
+#     if request.method == "POST":
+#         serializer = serializers.CategorySerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response({"message": "Hello, world!"})
+#
+
+
 
 @api_view(['POST'])
 def work_post(request):
-    if request.method == 'POST':
-        serializer = serializers.WorkSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+    """Create a new Work object"""
+    serializer = serializers.WorkSerializer(data=request.data, context={"request": request})
+    if serializer.is_valid():
+        try:
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response({"message": "Hello, world!"})
+            return Response(
+                {"message": "Work created successfully", "data": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "A work with this name already exists for the current user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["PUT"])
 def work_put(request, pk):
+    """Update an existing Work object"""
     work_instance = get_object_or_404(models.Work, pk=pk, created_by=request.user)
-    if request.method == "PUT":
-        serializer = serializers.WorkSerializer(work_instance, data=request.data)
-        if serializer.is_valid(raise_exception=True):
+    serializer = serializers.WorkSerializer(work_instance, data=request.data, context={"request": request})
+    if serializer.is_valid():
+        try:
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response({"message": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Work updated successfully", "data": serializer.data},
+                status=status.HTTP_200_OK
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "A work with this name already exists for the current user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["PUT"])
 def category_update(request, pk):
+    """Update an existing Category object"""
     category_ins = get_object_or_404(models.Category, pk=pk, created_by=request.user)
-    if request.method == "PUT":
-        serializer = serializers.CategorySerializer(category_ins, data=request.data)
-        if serializer.is_valid(raise_exception=True):
+    serializer = serializers.CategorySerializer(category_ins, data=request.data, context={"request": request})
+    if serializer.is_valid():
+        try:
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response({"message": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Category updated successfully", "data": serializer.data},
+                status=status.HTTP_200_OK
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "A category with this name already exists for the current user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
 def category_create(request):
-    if request.method == "POST":
-        serializer = serializers.CategorySerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+    """Create a new Category object"""
+    serializer = serializers.CategorySerializer(data=request.data, context={"request": request})
+    if serializer.is_valid():
+        try:
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response({"message": "Hello, world!"})
-
+            return Response(
+                {"message": "Category created successfully", "data": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "A category with this name already exists for the current user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def job_post(request):

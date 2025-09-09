@@ -10,13 +10,18 @@ from vrp.forms import SignupForm, LoginForm
 def signup_view(request):
     """Signup / registration view"""
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect("dashboard", path="")
 
     form = SignupForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         username = form.cleaned_data["username"]
         password = form.cleaned_data["password"]
+        password_confirm = form.cleaned_data["confirm_password"]
+
+        if password != password_confirm:
+            messages.error(request, "Passwords don't match")
+            return redirect("signup")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists")
@@ -24,7 +29,7 @@ def signup_view(request):
             user = User.objects.create_user(username=username, password=password)
             login(request, user)
             messages.success(request, f"Welcome, {user.username}! Your account has been created.")
-            return redirect("dashboard")
+            return redirect("dashboard", path="")
 
     return render(request, "index.html", {"form": form})
 
@@ -32,7 +37,6 @@ def signup_view(request):
 
 def login_view(request):
     """Login view"""
-    print(request)
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect("admin-dashboard", path="")
 
