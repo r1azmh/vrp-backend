@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-
+from rest_framework.exceptions import NotFound
 from base import serializers, filters, models
 from base.vrp_extra import new_pragmatic_types as prg, config_types as cfg
 from base.vrp_extra.utils import get_job, get_multi_job, get_vehicles, get_routing_matrix, \
@@ -513,7 +513,9 @@ def bulk_job_create(request):
             work = serializer.validated_data["work_id"]
             serialize_data = [item | {"work_id": work.id} for item in data]
             job_serializer = serializers.JobSerializer(data=serialize_data,
-                                                       many=True)
+                                                       many=True,
+                                                       context={"request": request}
+                                                       )
 
             if job_serializer.is_valid(raise_exception=True):
                 job_serializer.save()
@@ -531,9 +533,14 @@ def bulk_fleet_create(request):
                 io.StringIO(serializer.validated_data["file"].read().decode("utf-8-sig")))
             data = list(reader)
             work = serializer.validated_data["work_id"]
+
+
             serialize_data = [item | {"work_id": work.id} for item in data]
-            fleet_serializer = serializers.VehicleSerializer(data=serialize_data,
-                                                             many=True)
+            fleet_serializer = serializers.VehicleSerializer(
+                data=serialize_data,
+                many=True,
+                context={"request": request}
+            )
 
             if fleet_serializer.is_valid(raise_exception=True):
                 print(fleet_serializer.data)

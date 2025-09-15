@@ -79,6 +79,22 @@ class JobSerializer(serializers.ModelSerializer):
         model = models.Job
         fields = "__all__"
 
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user if request else None
+
+        work = attrs.get("work")
+        category = attrs.get("category")
+
+        # Check ownership
+        if work and work.created_by != user:
+            raise serializers.ValidationError({"work_id": "You don’t own this work."})
+
+        if category and category.created_by != user:
+            raise serializers.ValidationError({"category": "You don’t own this category."})
+
+        return attrs
+
 
 class JobPostSerializer(serializers.ModelSerializer):
     work_id = serializers.PrimaryKeyRelatedField(source='work',
@@ -127,6 +143,22 @@ class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Vehicle
         fields = "__all__"
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user if request else None
+
+        work = attrs.get("work")
+        profile = attrs.get("profile")
+
+        # Check ownership
+        if work and work.created_by != user:
+            raise serializers.ValidationError({"work_id": "You don’t own this work."})
+
+        if profile and profile.created_by != user:
+            raise serializers.ValidationError({"profile_id": "You don’t own this profile."})
+
+        return attrs
 
 class VehicleBulkSerializer(serializers.ModelSerializer):
     work_id = serializers.PrimaryKeyRelatedField(source='work',
