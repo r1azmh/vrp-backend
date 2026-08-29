@@ -1,73 +1,189 @@
-# VRP Solutions - BackEnd
-This is a project affiliated with University of Vaasa, Finland.
-#### Project Title: [Optimising distribution transport in the food ecosystem](https://www.uwasa.fi/en/elintarvike-ekosysteemi)
-#### Principal Investigator: [Professor Petri Helo](https://www.uwasa.fi/en/person/1041808)
-This project utilizes the OpenSource VRP Solver, [VRP CLI](https://github.com/reinterpretcat/vrp). The objective is to develop a user-friendly VRP Solver with a straightforward user interface, implementing an efficient algorithm.
-## How to install
-Before you begin, make sure you have Python 3.9 or 3.10 installed.
-1. Clone the Repository
-* Choose the project directory: Open the Command Prompt and go to the desired location of your computer where you want to download the project.
-```shell
-cd C:\your-location
+# RouteShaper — Backend
+
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+RouteShaper is an open-source, web-based decision-support tool for industrial freight route planning with integrated CO₂ emission estimation and quality (freshness) reporting for perishable goods.
+
+This repository contains the **backend**: a Django REST service that stores the routing problem, calls the optimization engine, produces the route, emission and freshness reports, and serves the compiled web interface. The interface source lives in [vrp-frontend](https://github.com/r1azmh/vrp-frontend).
+
+Developed at the School of Technology and Innovations, University of Vaasa,
+Finland, within the project [Optimising distribution transport in the food ecosystem](https://www.uwasa.fi/en/elintarvike-ekosysteemi).
+
+---
+
+## What it does
+
+| Capability | Description |
+| --- | --- |
+| Route optimization | Capacitated pickup/delivery with time windows, solved by the [vrp-cli](https://github.com/reinterpretcat/vrp) (Rosomaxa) metaheuristic engine. |
+| Realistic travel matrices | Distances and durations from the OpenRouteService Matrix API on the `driving-hgv` profile, so results follow the road network and HGV restrictions rather than straight-line distance. |
+| CO₂ emission reporting | Per-segment emissions using load-dependent factors by truck type. |
+| Freshness reporting | Per-container quality-deterioration cost from category-specific hourly penalty rates. |
+| Bulk import | CSV import of jobs and fleet for industrial-scale instances. |
+| Exports | Route plan and emission report as CSV. |
+
+RouteShaper is an **integration layer**: optimization is performed by vrp-cli and travel matrices by OpenRouteService. The contribution is the combination of those components with emission and quality reporting behind a practitioner-facing interface.
+
+---
+
+## Architecture
+
 ```
-* Clone the repository to your computer:
-```shell
-git clone https://github.com/r1azmh/vrp-backend.git
+Browser ──▶ Django (serves the compiled React app + REST API)
+               │
+               ├──▶ vrp-cli            (optimization engine, in-process)
+               ├──▶ OpenRouteService   (matrix API, driving-hgv)
+               └──▶ SQLite / MySQL
 ```
-2. Install Required Libraries
-```shell
-cd C:\your-location\vrp-backend
-```
+
+The interface is compiled to static assets and served by Django, so a
+deployment runs a single web process.
+
+---
+
+## Requirements
+
+- **Python 3.11 or newer.** `numpy==2.3.2` in `requirements.txt` does not
+  support 3.9 or 3.10. Verified on 3.12.
+- Node.js 18+ with Yarn or npm, to build the interface
+- An [OpenRouteService API key](https://openrouteservice.org/dev/)
+- MySQL 8 only for server deployments; local installs use SQLite
+
+---
+
+## Installation
+
+### 1. Backend
+
 ```bash
-# Install all the required libraries
+git clone https://github.com/r1azmh/vrp-backend.git
+cd vrp-backend
+python -m venv .venv
+# Windows:      .venv\Scripts\activate
+# Linux/macOS:  source .venv/bin/activate
 pip install -r requirements.txt
 ```
-3. Set up Routing Matrix Generator
 
-i. Go to the openrouteservice website using the following link and generate an API key.
-[Link](https://openrouteservice.org/dev/)
+### 2. Configuration
 
-ii. Go to 
-```shell
-cd C:\your-location\vrp-backend\vrp\settings.py
-```
- then replace ORS_SECRET_KEY with your API key.
-```shell
-ORS_SECRET_KEY = env.str('ORS_SECRET_KEY')
-```
-4. Make Migrations
-* Go to comand prompt and write the following comands.
-```shell
-cd C:\your-location\vrp-backend
-```
+Settings are read from environment variables via
+[`environs`](https://pypi.org/project/environs/).
+
+**Server deployment — use a `.env` file:**
+
 ```bash
-python manage.py makemigrations
+cp .env.example .env
 ```
+
+```ini
+SECRET_KEY=<a long random string>
+DEBUG=False
+ORS_SECRET_KEY=<your OpenRouteService API key>
+ALLOWED_HOSTS=your-domain.example
+DATABASE_NAME=vrp
+DATABASE_USER=vrp_user
+DATABASE_PASSWORD=<password>
+DATABASE_PORT=3306
+```
+
+**Local use — edit `vrp/settings.py` directly.** For a single-machine install
+you may replace the two lookups with literals:
+
+```python
+SECRET_KEY = "any-non-empty-string"
+ORS_SECRET_KEY = "your-openrouteservice-api-key"
+```
+
+Either way both keys must be set; Django will not start without them.
+
+The database is selected by the `MODE` constant near the top of `vrp/settings.py`. `MODE = "development"` (the default) uses a local SQLite file and needs no further setup; `MODE = "production"` uses the MySQL settings above.
+
+`STATIC_ROOT` in `vrp/settings.py` points at the deployment host's static directory. Change it to a path on your own machine before running `collectstatic`.
+
+### 3. Build and install the web interface
+
+Django serves the compiled interface. The backend alone renders no pages —
+`/signup/`, `/login/` and `/dashboard/` fail until this step is done.
+
+```bash
+git clone https://github.com/r1azmh/vrp-frontend.git
+cd vrp-frontend
+echo "REACT_APP_BASE_URL=http://localhost:8000" > .env
+yarn install
+yarn build
+```
+
+Copy the build output into the backend:
+
+```bash
+# from the vrp-backend directory
+mkdir -p templates static
+cp ../vrp-frontend/build/index.html  templates/
+cp -r ../vrp-frontend/build/static/* static/
+```
+
+For interface development, run the React dev server on port 3000 against the backend on 8000 instead — see the frontend README.
+
+### 4. Initialise and run
+
 ```bash
 python manage.py migrate
-```
-5. Run the Solver
-* Run the Django development server:
-```shell
 python manage.py runserver
 ```
-6. Set Up Frontend
-* Download and set up frontend from this [link](https://github.com/r1azmh/vrp-frontend) to use the solver.
 
-## How to Use
-1. Initiate a New Work
-2. Add Jobs
-3. Add Vehicles
-4. Run the Solver to get the Solution
-## Contact
+Open `http://localhost:8000/signup/` and register an account. All data — works, jobs, fleet, categories, vehicle profiles — is scoped to the account that creates it.
 
-In case of any issues or inquiries, please contact us at [riaz.mahmud@uwasa.fi](mailto:riaz.mahmud@uwasa.fi).
+---
+
+## API reference
+
+All endpoints require an authenticated session. Base path `/`.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `works/`, `search-works/` | List / search routing tasks |
+| POST | `work-create/` | Create a routing task |
+| PUT / DELETE | `work-update/<pk>/`, `work_delete/<pk>/` | Modify a task |
+| GET / POST | `jobs/`, `job-create/` | Jobs (pickups / deliveries) |
+| POST | `job-create-bulk/`, `fleet-create-bulk/` | CSV bulk import |
+| GET / POST | `vehicles/`, `vehicle-create/` | Fleet |
+| GET / POST | `vehicle-profiles/`, `vehicle-profile-create/` | Vehicle profiles |
+| GET / POST | `categories/`, `category_create/` | Perishability categories |
+| GET | `solve/<pk>` | Run the optimization |
+| GET | `last_solution/` | Retrieve the most recent solution |
+| GET | `export_solution_csv/<pk>/` | Route plan as CSV |
+| GET | `emission_report/<pk>/` | Emission report (`?export_to_csv=true` for CSV) |
+
+---
+
+## Limitations
+
+- The OpenRouteService free tier caps matrix size and daily requests; large instances need a paid plan or a self-hosted ORS instance. One solve consumes one matrix request.
+- Travel times are ORS estimates and exclude traffic, driver breaks and delays beyond the configured service time.
+- Freshness penalties are reported but not optimised, and are not stable across solver runs.
+- Emission factors are European diesel HGV defaults; other fleets require substituting the factor table.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. Please open an issue describing the
+change before submitting substantial pull requests.
 
 ## License
 
-Apache License
-Version 2.0, January 2004
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and
+[NOTICE](NOTICE).
 
-Copyright © 2024 Petri Helo and Riaz Mahmud.
+Copyright © 2024–2026 Petri Helo and Riaz Mahmud.
 
-Licensed under the Apache License, Version 2.0; you may not use this file except in compliance with the License. You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0). Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+## Acknowledgements
+
+Supported by the European Regional Development Fund and the Regional Council
+of South Ostrobothnia (grant A80384). RouteShaper builds on
+[vrp-cli / Rosomaxa](https://github.com/reinterpretcat/vrp) and
+[OpenRouteService](https://openrouteservice.org/) (HeiGIT).
+
+## Contact
+
+[riaz dot mahmud at uwasa.fi]
