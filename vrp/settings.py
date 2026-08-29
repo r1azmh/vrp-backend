@@ -25,6 +25,8 @@ env.read_env()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str('SECRET_KEY')
 
+MODE = "development"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
@@ -93,12 +95,25 @@ WSGI_APPLICATION = 'vrp.wsgi.application'
 #         'PORT': env.int('MYSQL_PORT'),
 #     }
 # }
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+
+if MODE == "development":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "mydatabase",
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': env("DATABASE_NAME"),
+            'USER': env("DATABASE_USER"),
+            'PASSWORD': env("DATABASE_PASSWORD"),
+            'HOST': 'localhost',
+            'PORT': env("DATABASE_PORT"),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -137,12 +152,15 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 # Where Django will collect static files for production
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = '/home/daruqzkh/routeshaper.live_public_html/static'
 
 # Additional directories to look for static files (during development)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+MEDIA_URL =   '/media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
