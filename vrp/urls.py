@@ -14,6 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.views.static import serve
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.contrib.auth import views as auth_views
@@ -44,5 +46,9 @@ urlpatterns = [
     re_path(r"^dashboard/(?P<path>.*)$", views.dashboard, name="dashboard"),
     re_path(r"^dashboard(?P<path>.*)$", views.dashboard, name="dashboard-ordinary"),
 
-    re_path(r'^(?P<path>.*)$', views.home, name="home"),
+    re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.BASE_DIR / "static"}),
+    re_path(r"^(?P<path>favicon\.ico|manifest\.json|asset-manifest\.json|logo192\.png|logo512\.png|robots\.txt)$", serve, {"document_root": settings.BASE_DIR / "static"}),
+    re_path(r"^(?!static/|media/|admin/)(?P<path>.*)$", views.home, name="home"),
+
+    #re_path(r'^(?P<path>.*)$', views.home, name="home"),
 ]
