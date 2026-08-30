@@ -2,12 +2,18 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-RouteShaper is an open-source, web-based decision-support tool for industrial freight route planning with integrated CO₂ emission estimation and quality (freshness) reporting for perishable goods.
+RouteShaper is an open-source, web-based decision-support tool for industrial
+freight route planning with integrated CO₂ emission estimation and quality
+(freshness) reporting for perishable goods.
 
-This repository contains the **backend**: a Django REST service that stores the routing problem, calls the optimization engine, produces the route, emission and freshness reports, and serves the compiled web interface. The interface source lives in [vrp-frontend](https://github.com/r1azmh/vrp-frontend).
+This repository contains the **backend**: a Django REST service that stores the
+routing problem, calls the optimization engine, produces the route, emission
+and freshness reports, and serves the compiled web interface. The interface
+source lives in [vrp-frontend](https://github.com/r1azmh/vrp-frontend).
 
 Developed at the School of Technology and Innovations, University of Vaasa,
-Finland, within the project [Optimising distribution transport in the food ecosystem](https://www.uwasa.fi/en/elintarvike-ekosysteemi).
+Finland, within the project
+[Optimising distribution transport in the food ecosystem](https://www.uwasa.fi/en/elintarvike-ekosysteemi).
 
 ---
 
@@ -22,7 +28,10 @@ Finland, within the project [Optimising distribution transport in the food ecosy
 | Bulk import | CSV import of jobs and fleet for industrial-scale instances. |
 | Exports | Route plan and emission report as CSV. |
 
-RouteShaper is an **integration layer**: optimization is performed by vrp-cli and travel matrices by OpenRouteService. The contribution is the combination of those components with emission and quality reporting behind a practitioner-facing interface.
+RouteShaper is an **integration layer**: optimization is
+performed by vrp-cli and travel matrices by OpenRouteService. The contribution
+is the combination of those components with emission and quality reporting
+behind a practitioner-facing interface.
 
 ---
 
@@ -45,7 +54,7 @@ deployment runs a single web process.
 
 - **Python 3.11 or newer.** `numpy==2.3.2` in `requirements.txt` does not
   support 3.9 or 3.10. Verified on 3.12.
-- Node.js 18+ with Yarn or npm, to build the interface
+- Node.js `^20.19.0` or `>=22.12.0` with Yarn, to build the interface
 - An [OpenRouteService API key](https://openrouteservice.org/dev/)
 - MySQL 8 only for server deployments; local installs use SQLite
 
@@ -96,42 +105,58 @@ ORS_SECRET_KEY = "your-openrouteservice-api-key"
 
 Either way both keys must be set; Django will not start without them.
 
-The database is selected by the `MODE` constant near the top of `vrp/settings.py`. `MODE = "development"` (the default) uses a local SQLite file and needs no further setup; `MODE = "production"` uses the MySQL settings above.
+The database is selected by the `MODE` constant near the top of
+`vrp/settings.py`. `MODE = "development"` (the default) uses a local SQLite
+file and needs no further setup; `MODE = "production"` uses the MySQL settings
+above.
 
-`STATIC_ROOT` in `vrp/settings.py` points at the deployment host's static directory. Change it to a path on your own machine before running `collectstatic`.
+`STATIC_ROOT` in `vrp/settings.py` points at the deployment host's static
+directory. Change it to a path on your own machine before running
+`collectstatic`.
 
-### 3. Build and install the web interface
+### 3. Build the web interface
 
 Django serves the compiled interface. The backend alone renders no pages —
-`/signup/`, `/login/` and `/dashboard/` fail until this step is done.
+`/signup/`, `/login/` and `/dashboard/` fail with `TemplateDoesNotExist` until
+this step is done.
+
+The frontend build writes its output **into this project directory**: Vite
+emits `templates/index.html` (a Django template, with asset URLs rewritten to
+`{% static %}` tags and the CSRF token injected) and the hashed bundles into
+`static/`. There is no copying step.
 
 ```bash
 git clone https://github.com/r1azmh/vrp-frontend.git
 cd vrp-frontend
-echo "REACT_APP_BASE_URL=http://localhost:8000" > .env
 yarn install
-yarn build
+yarn build          # writes into ../vrp-backend
 ```
 
-Copy the build output into the backend:
+If the two checkouts are not siblings, point the build at this directory:
 
 ```bash
-# from the vrp-backend directory
-mkdir -p templates static
-cp ../vrp-frontend/build/index.html  templates/
-cp -r ../vrp-frontend/build/static/* static/
+VRP_BACKEND_DIR=/path/to/vrp-backend yarn build
 ```
 
-For interface development, run the React dev server on port 3000 against the backend on 8000 instead — see the frontend README.
+Requires Node.js `^20.19.0` or `>=22.12.0`, and Yarn. Re-run `yarn build`
+after any interface change; asset filenames are content-hashed, so old bundles
+accumulate in `static/` and can be cleared periodically.
 
-### 4. Initialise and run
+### 4. Initialize and run
 
 ```bash
 python manage.py migrate
 python manage.py runserver
 ```
 
-Open `http://localhost:8000/signup/` and register an account. All data — works, jobs, fleet, categories, vehicle profiles — is scoped to the account that creates it.
+Open `http://localhost:8000/signup/` and register an account.
+
+If pages load blank, check the content type of `/static/main-<hash>.js`: it
+must be `text/javascript`. If it comes back as `text/html`, the catch-all URL
+pattern in `vrp/urls.py` is answering asset requests and needs an explicit
+`static/` route placed before it. All data —
+works, jobs, fleet, categories, vehicle profiles — is scoped to the account
+that creates it.
 
 ---
 
@@ -158,10 +183,15 @@ All endpoints require an authenticated session. Base path `/`.
 
 ## Limitations
 
-- The OpenRouteService free tier caps matrix size and daily requests; large instances need a paid plan or a self-hosted ORS instance. One solve consumes one matrix request.
-- Travel times are ORS estimates and exclude traffic, driver breaks and delays beyond the configured service time.
-- Freshness penalties are reported but not optimised, and are not stable across solver runs.
-- Emission factors are European diesel HGV defaults; other fleets require substituting the factor table.
+- The OpenRouteService free tier caps matrix size and daily requests; large
+  instances need a paid plan or a self-hosted ORS instance. One solve consumes
+  one matrix request.
+- Travel times are ORS estimates and exclude traffic, driver breaks and delays
+  beyond the configured service time.
+- Freshness penalties are reported but not optimized, and are not stable
+  across solver runs.
+- Emission factors are European diesel HGV defaults; other fleets require
+  substituting the factor table.
 
 ---
 
@@ -185,4 +215,4 @@ of South Ostrobothnia (grant A80384). RouteShaper builds on
 
 ## Contact
 
-[riaz dot mahmud at uwasa.fi]
+riaz dot mahmud at uwasa.fi 
