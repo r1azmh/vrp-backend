@@ -122,7 +122,7 @@ this step is done.
 The [frontend](https://github.com/r1azmh/vrp-frontend) build writes its output **into this project directory**: Vite
 emits `templates/index.html` (a Django template, with asset URLs rewritten to
 `{% static %}` tags and the CSRF token injected) and the hashed bundles into
-`static/`. There is no copying step.
+`static/`.
 
 ```bash
 git clone https://github.com/r1azmh/vrp-frontend.git
