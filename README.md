@@ -181,6 +181,13 @@ All endpoints require an authenticated session. Base path `/`.
 
 ---
 
+## Video Tutorial
+
+A complete step-by-step video tutorial for installation and implementation of RouteShaper is available here:
+[Tutorial Link](https://youtu.be/V_FPSygpemU).
+
+---
+
 ## Limitations
 
 - The OpenRouteService free tier caps matrix size and daily requests; large
