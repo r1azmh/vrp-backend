@@ -120,7 +120,7 @@ Django serves the compiled interface. The backend alone renders no pages —
 `/signup/`, `/login/` and `/dashboard/` fail with `TemplateDoesNotExist` until
 this step is done.
 
-The frontend build writes its output **into this project directory**: Vite
+The [frontend](https://github.com/r1azmh/vrp-frontend) build writes its output **into this project directory**: Vite
 emits `templates/index.html` (a Django template, with asset URLs rewritten to
 `{% static %}` tags and the CSRF token injected) and the hashed bundles into
 `static/`. There is no copying step.
