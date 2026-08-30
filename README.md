@@ -52,8 +52,7 @@ deployment runs a single web process.
 
 ## Requirements
 
-- **Python 3.11 or newer.** `numpy==2.3.2` in `requirements.txt` does not
-  support 3.9 or 3.10. Verified on 3.12.
+- Python 3.10.18 or newer.
 - Node.js `^20.19.0` or `>=22.12.0` with Yarn, to build the interface
 - An [OpenRouteService API key](https://openrouteservice.org/dev/)
 - MySQL 8 only for server deployments; local installs use SQLite
